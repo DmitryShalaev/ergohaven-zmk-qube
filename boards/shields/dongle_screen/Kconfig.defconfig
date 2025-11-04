@@ -11,9 +11,9 @@ config ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
     select LV_USE_LABEL
     select LV_USE_IMG
     select LV_USE_CANVAS
-    select LV_USE_ANIMIMG 
+    select LV_USE_ANIMIMG
     select LV_USE_ANIMATION
-    select LV_USE_LINE 
+    select LV_USE_LINE
     select LV_FONT_UNSCII_8
     select ZMK_WPM
     imply ZMK_HID_INDICATORS
@@ -56,7 +56,7 @@ config LV_DISP_DEF_REFR_PERIOD
     default 20
 
 choice LV_FONT_DEFAULT
-    default LV_FONT_DEFAULT_MONTSERRAT_20
+    default LV_FONT_DEFAULT_MONTSERRAT_24
 endchoice
 
 config LV_FONT_MONTSERRAT_40
@@ -153,4 +153,13 @@ config DONGLE_SCREEN_BATTERY_ACTIVE
     default y
     help
       If the Battery Widget should be active or not
+
+config QUBE_HID_EN_LAYER
+    int "English layer"
+    default 0
+
+config QUBE_HID_RU_LAYER
+    int "Russian layer"
+    default 1
+
 endif

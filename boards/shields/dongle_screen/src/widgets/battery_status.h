@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: MIT
  */
- 
+
 #pragma once
 
 #include <lvgl.h>
@@ -11,6 +11,7 @@
 
 struct zmk_widget_dongle_battery_status {
     sys_snode_t node;
+    lv_obj_t *label;
     lv_obj_t *obj;
 };
 

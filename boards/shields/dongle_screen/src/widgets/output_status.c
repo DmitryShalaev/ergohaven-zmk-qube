@@ -19,10 +19,9 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/endpoints.h>
 
 #include "output_status.h"
+#include "fonts.h"
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
-
-lv_point_t selection_line_points[] = {{0, 0}, {13, 0}}; // will be replaced with lv_point_precise_t
 
 struct output_status_state
 {
@@ -45,50 +44,34 @@ static struct output_status_state get_state(const zmk_event_t *_eh)
 
 static void set_status_symbol(struct zmk_widget_output_status *widget, struct output_status_state state)
 {
-    const char *ble_color = "ffffff";
-    const char *usb_color = "ffffff";
-    char transport_text[50] = {};
-    if (state.usb_is_hid_ready == 0)
-    {
-        usb_color = "ff0000";
-    }
-    else
-    {
+    const char *ble_color = "777777";
+    const char *usb_color = "777777";
+
+    switch (state.selected_endpoint.transport) {
+      case ZMK_TRANSPORT_USB:
         usb_color = "ffffff";
-    }
-
-    if (state.active_profile_connected == 1)
-    {
-        ble_color = "00ff00";
-    }
-    else if (state.active_profile_bonded == 1)
-    {
-        ble_color = "0000ff";
-    }
-    else
-    {
+        break;
+      case ZMK_TRANSPORT_BLE:
         ble_color = "ffffff";
-    }
-
-    switch (state.selected_endpoint.transport)
-    {
-    case ZMK_TRANSPORT_USB:
-        snprintf(transport_text, sizeof(transport_text), "> #%s USB#\n#%s BLE#", usb_color, ble_color);
-        break;
-    case ZMK_TRANSPORT_BLE:
-        snprintf(transport_text, sizeof(transport_text), "#%s USB#\n> #%s BLE#", usb_color, ble_color);
         break;
     }
 
-    lv_label_set_recolor(widget->transport_label, true);
+    if (state.usb_is_hid_ready == 0)
+        usb_color = "000000";
+
+    const char *ble_icon = "󰂲";
+    if (state.active_profile_connected == 1)
+        ble_icon = "󰂱";
+    else if (state.active_profile_bonded == 1)
+        ble_icon = "󰂯";
+
+    char transport_text[50] = {};
+    snprintf(transport_text, sizeof(transport_text),
+             "#%s 󰕓#   #%s %s %d#", usb_color, ble_color, ble_icon,
+             state.active_profile_index + 1);
+
     lv_obj_set_style_text_align(widget->transport_label, LV_TEXT_ALIGN_RIGHT, 0);
     lv_label_set_text(widget->transport_label, transport_text);
-
-    char ble_text[12];
-
-    snprintf(ble_text, sizeof(ble_text), "%d", state.active_profile_index + 1);
-    // lv_obj_set_style_text_align(widget->ble_label, LV_TEXT_ALIGN_RIGHT, 0);
-    lv_label_set_text(widget->ble_label, ble_text);
 }
 
 static void output_status_update_cb(struct output_status_state state)
@@ -110,13 +93,12 @@ ZMK_SUBSCRIPTION(widget_output_status, zmk_usb_conn_state_changed);
 int zmk_widget_output_status_init(struct zmk_widget_output_status *widget, lv_obj_t *parent)
 {
     widget->obj = lv_obj_create(parent);
-    lv_obj_set_size(widget->obj, 240, 77);
+    lv_obj_set_size(widget->obj, 286, 40);
 
     widget->transport_label = lv_label_create(widget->obj);
-    lv_obj_align(widget->transport_label, LV_ALIGN_TOP_RIGHT, -10, 10);
-
-    widget->ble_label = lv_label_create(widget->obj);
-    lv_obj_align(widget->ble_label, LV_ALIGN_TOP_RIGHT, -10, 56);
+    lv_obj_align(widget->transport_label, LV_ALIGN_TOP_RIGHT, 0, 0);
+    lv_obj_set_style_text_font(widget->transport_label, &nerd_fonts_small, 0);
+    lv_label_set_recolor(widget->transport_label, true);
 
     sys_slist_append(&widgets, &widget->node);
 
