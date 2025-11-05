@@ -57,9 +57,12 @@ static void set_battery_symbol(lv_obj_t *label, struct battery_state state) {
     else if (state.level < 10)
         bat_color = "ffff00";
 
-    snprintf(battery_text[state.source], sizeof(battery_text[state.source]),
-        "#%s %s %i#", bat_color, bat_icon, state.level);
-
+    if (state.level > 0)
+        snprintf(battery_text[state.source], sizeof(battery_text[state.source]),
+            "#%s %s %i#", bat_color, bat_icon, state.level);
+    else
+        snprintf(battery_text[state.source], sizeof(battery_text[state.source]),
+            "#%s %s ?#", bat_color, bat_icon);
     char text[NBAT*sizeof(battery_text[0])] = "";
     int idx = 0;
     for (int i = 0; i < NBAT; ++i)
