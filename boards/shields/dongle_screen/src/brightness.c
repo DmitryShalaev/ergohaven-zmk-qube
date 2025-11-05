@@ -2,6 +2,7 @@
 #include <zephyr/device.h>
 #include <zephyr/drivers/led.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/settings/settings.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/keycode_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
@@ -47,6 +48,7 @@ static void apply_brightness(uint8_t value)
 void set_screen_brightness(uint8_t value)
 {
     user_brightness = clamp_brightness(value);
+    settings_save_one("qube/brightness", &user_brightness, sizeof(user_brightness));
     apply_brightness(user_brightness);
 }
 
@@ -219,7 +221,6 @@ ZMK_SUBSCRIPTION(screen_idle, zmk_layer_state_changed);
 
 static int init_fixed_brightness(void)
 {
-    set_screen_brightness(user_brightness);
     last_activity = k_uptime_get();
 #if CONFIG_DONGLE_SCREEN_IDLE_TIMEOUT_S > 0
     // Wake up the idle thread at boot
@@ -229,5 +230,18 @@ static int init_fixed_brightness(void)
 #endif
     return 0;
 }
+
+static int qube_brightness_handle_set(const char *name, size_t len, settings_read_cb read_cb,
+                                      void *cb_arg) {
+    if (!strcmp(name, "brightness") && len == sizeof(user_brightness)) {
+        read_cb(cb_arg, &user_brightness, len);
+        set_screen_brightness(user_brightness);
+    }
+    return 0;
+}
+
+SETTINGS_STATIC_HANDLER_DEFINE(qube_backlight, "qube", NULL, qube_brightness_handle_set, NULL,
+                               NULL);
+
 
 SYS_INIT(init_fixed_brightness, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
