@@ -27,22 +27,17 @@ struct layer_status_state
 
 static void set_layer_symbol(lv_obj_t *label, struct layer_status_state state)
 {
+    char text[32] = {};
     if (state.label == NULL)
-    {
-        char text[7] = {};
-
         sprintf(text, "%i", state.index);
-
-        lv_label_set_text(label, text);
-    }
     else
     {
-        char text[32] = {};
-
-        snprintf(text, sizeof(text), "%s", state.label);
-
-        lv_label_set_text(label, text);
+        if (state.label[0] > '\xe0') // label starts with nerd font symbol
+            snprintf(text, sizeof(text), "%s", state.label);
+        else
+            snprintf(text, sizeof(text), "  %s", state.label);
     }
+    lv_label_set_text(label, text);
 }
 
 static void layer_status_update_cb(struct layer_status_state state)
