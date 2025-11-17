@@ -50,9 +50,7 @@ static void set_battery_symbol(lv_obj_t *label, struct battery_state state) {
     const char* bat_icon = BAT_ICON[state.level / 10];
 
     const char* bat_color = "ffffff";
-    if (state.level == 0)
-        bat_color = "777777";
-    else if (state.level < 5)
+    if (state.level < 5)
         bat_color = "ff0000";
     else if (state.level < 10)
         bat_color = "ffff00";
