@@ -3,11 +3,12 @@
 #include <lvgl.h>
 #include <zmk/display.h>
 
-struct zmk_widget_mod_status
-{
+#define ZMK_MOD_STATUS_CHIP_COUNT 5
+
+struct zmk_widget_mod_status {
     sys_snode_t node;
     lv_obj_t *obj;
-    lv_obj_t *label;
+    lv_obj_t *chips[ZMK_MOD_STATUS_CHIP_COUNT];
 };
 
 int zmk_widget_mod_status_init(struct zmk_widget_mod_status *widget, lv_obj_t *parent);
