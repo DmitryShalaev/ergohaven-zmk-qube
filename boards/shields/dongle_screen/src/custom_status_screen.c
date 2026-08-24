@@ -79,7 +79,7 @@ lv_obj_t *zmk_display_status_screen()
 
 #if CONFIG_DONGLE_SCREEN_LAYER_ACTIVE
     zmk_widget_layer_status_init(&layer_status_widget, screen_main);
-    lv_obj_align(zmk_widget_layer_status_obj(&layer_status_widget), LV_ALIGN_CENTER, 0, -18);
+    lv_obj_align(zmk_widget_layer_status_obj(&layer_status_widget), LV_ALIGN_CENTER, 0, -28);
 #endif
 
 #if CONFIG_DONGLE_SCREEN_MODIFIER_ACTIVE
@@ -87,9 +87,9 @@ lv_obj_t *zmk_display_status_screen()
 #if CONFIG_DONGLE_SCREEN_LAYER_ACTIVE
     lv_obj_align_to(zmk_widget_mod_status_obj(&mod_widget),
                     zmk_widget_layer_status_obj(&layer_status_widget), LV_ALIGN_OUT_BOTTOM_MID, 0,
-                    6);
+                    16);
 #else
-    lv_obj_align(zmk_widget_mod_status_obj(&mod_widget), LV_ALIGN_CENTER, 0, 18);
+    lv_obj_align(zmk_widget_mod_status_obj(&mod_widget), LV_ALIGN_CENTER, 0, 20);
 #endif
 #endif
 
