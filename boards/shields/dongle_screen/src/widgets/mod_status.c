@@ -34,7 +34,7 @@ static const char *const chip_labels[ZMK_MOD_STATUS_CHIP_COUNT] = {
 };
 
 static const lv_coord_t chip_x[ZMK_MOD_STATUS_CHIP_COUNT] = {
-    23, 77, 147, 52, 114,
+    17, 71, 147, 52, 114,
 };
 
 static const lv_coord_t chip_y[ZMK_MOD_STATUS_CHIP_COUNT] = {
@@ -42,7 +42,7 @@ static const lv_coord_t chip_y[ZMK_MOD_STATUS_CHIP_COUNT] = {
 };
 
 static const lv_coord_t chip_width[ZMK_MOD_STATUS_CHIP_COUNT] = {
-    44, 60, 52, 50, 56,
+    44, 66, 58, 50, 56,
 };
 
 static lv_style_t chip_base_style;
@@ -150,6 +150,7 @@ int zmk_widget_mod_status_init(struct zmk_widget_mod_status *widget, lv_obj_t *p
         lv_obj_set_size(chip, chip_width[i], ZMK_MOD_STATUS_CHIP_HEIGHT);
         lv_obj_clear_flag(chip, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
 
+        lv_label_set_long_mode(chip, LV_LABEL_LONG_CLIP);
         lv_label_set_text(chip, chip_labels[i]);
         lv_obj_add_style(chip, &chip_base_style, LV_PART_MAIN);
         widget->chip_active[i] = false;
