@@ -40,6 +40,10 @@ static const lv_coord_t chip_width[ZMK_MOD_STATUS_CHIP_COUNT] = {
     38, 38, 46, 34, 34,
 };
 
+static lv_style_t chip_base_style;
+static lv_style_t chip_active_style;
+static bool chip_styles_initialized;
+
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
 struct mod_status_state {
@@ -58,12 +62,44 @@ static struct mod_status_state mod_status_get_state(const zmk_event_t *event) {
     };
 }
 
-static void set_chip_state(lv_obj_t *chip, bool active) {
-    lv_obj_set_style_bg_opa(chip, active ? LV_OPA_COVER : LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_opa(chip, active ? LV_OPA_COVER : LV_OPA_TRANSP,
-                                LV_PART_MAIN);
-    lv_obj_set_style_text_color(
-        chip, lv_color_hex(active ? RMK_COLOR_FOREGROUND : RMK_COLOR_DIM), LV_PART_MAIN);
+static void init_chip_styles(void) {
+    if (chip_styles_initialized) {
+        return;
+    }
+
+    lv_style_init(&chip_base_style);
+    lv_style_set_text_font(&chip_base_style, &lv_font_unscii_8);
+    lv_style_set_text_align(&chip_base_style, LV_TEXT_ALIGN_CENTER);
+    lv_style_set_text_letter_space(&chip_base_style, 0);
+    lv_style_set_text_color(&chip_base_style, lv_color_hex(RMK_COLOR_DIM));
+    lv_style_set_pad_all(&chip_base_style, 0);
+    lv_style_set_pad_top(&chip_base_style, 3);
+    lv_style_set_radius(&chip_base_style, 7);
+    lv_style_set_bg_color(&chip_base_style, lv_color_hex(RMK_COLOR_ACCENT_DIM));
+    lv_style_set_bg_opa(&chip_base_style, LV_OPA_TRANSP);
+    lv_style_set_border_color(&chip_base_style, lv_color_hex(RMK_COLOR_ACCENT));
+    lv_style_set_border_width(&chip_base_style, 1);
+    lv_style_set_border_opa(&chip_base_style, LV_OPA_TRANSP);
+
+    lv_style_init(&chip_active_style);
+    lv_style_set_text_color(&chip_active_style, lv_color_hex(RMK_COLOR_FOREGROUND));
+    lv_style_set_bg_opa(&chip_active_style, LV_OPA_COVER);
+    lv_style_set_border_opa(&chip_active_style, LV_OPA_COVER);
+
+    chip_styles_initialized = true;
+}
+
+static void set_chip_state(struct zmk_widget_mod_status *widget, size_t index, bool active) {
+    if (widget->chip_active[index] == active) {
+        return;
+    }
+
+    widget->chip_active[index] = active;
+    if (active) {
+        lv_obj_add_style(widget->chips[index], &chip_active_style, LV_PART_MAIN);
+    } else {
+        lv_obj_remove_style(widget->chips[index], &chip_active_style, LV_PART_MAIN);
+    }
 }
 
 static void mod_status_update_cb(struct mod_status_state state) {
@@ -78,7 +114,7 @@ static void mod_status_update_cb(struct mod_status_state state) {
     struct zmk_widget_mod_status *widget;
     SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
         for (size_t i = 0; i < ZMK_MOD_STATUS_CHIP_COUNT; i++) {
-            set_chip_state(widget->chips[i], active[i]);
+            set_chip_state(widget, i, active[i]);
         }
     }
 }
@@ -91,6 +127,8 @@ ZMK_SUBSCRIPTION(widget_mod_status, zmk_hid_indicators_changed);
 ZMK_SUBSCRIPTION(widget_mod_status, zmk_endpoint_changed);
 
 int zmk_widget_mod_status_init(struct zmk_widget_mod_status *widget, lv_obj_t *parent) {
+    init_chip_styles();
+
     widget->obj = lv_obj_create(parent);
     lv_obj_remove_style_all(widget->obj);
     lv_obj_set_size(widget->obj, 222, 16);
@@ -105,18 +143,8 @@ int zmk_widget_mod_status_init(struct zmk_widget_mod_status *widget, lv_obj_t *p
         lv_obj_clear_flag(chip, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
 
         lv_label_set_text(chip, chip_labels[i]);
-        lv_obj_set_style_text_font(chip, &lv_font_unscii_8, LV_PART_MAIN);
-        lv_obj_set_style_text_align(chip, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-        lv_obj_set_style_text_letter_space(chip, 0, LV_PART_MAIN);
-
-        lv_obj_set_style_pad_all(chip, 0, LV_PART_MAIN);
-        lv_obj_set_style_pad_top(chip, 3, LV_PART_MAIN);
-        lv_obj_set_style_radius(chip, 7, LV_PART_MAIN);
-
-        lv_obj_set_style_bg_color(chip, lv_color_hex(RMK_COLOR_ACCENT_DIM), LV_PART_MAIN);
-        lv_obj_set_style_border_color(chip, lv_color_hex(RMK_COLOR_ACCENT), LV_PART_MAIN);
-        lv_obj_set_style_border_width(chip, 1, LV_PART_MAIN);
-        set_chip_state(chip, false);
+        lv_obj_add_style(chip, &chip_base_style, LV_PART_MAIN);
+        widget->chip_active[i] = false;
     }
 
     sys_slist_append(&widgets, &widget->node);
