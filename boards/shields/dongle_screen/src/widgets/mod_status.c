@@ -20,6 +20,9 @@
 
 #define ZMK_MOD_STATUS_CAPS_LOCK_LED 0x02U
 #define ZMK_MOD_STATUS_REFRESH_MS 50
+#define ZMK_MOD_STATUS_CHIP_HEIGHT 22
+#define ZMK_MOD_STATUS_SECOND_ROW_Y 30
+#define ZMK_MOD_STATUS_WIDGET_HEIGHT 52
 
 #define RMK_COLOR_FOREGROUND 0xEFF7F7U
 #define RMK_COLOR_DIM 0x6570B1U
@@ -27,15 +30,19 @@
 #define RMK_COLOR_ACCENT_DIM 0x084194U
 
 static const char *const chip_labels[ZMK_MOD_STATUS_CHIP_COUNT] = {
-    "CAPS", "CTRL", "SHIFT", "ALT", "GUI",
+    "CTRL", "SHIFT", "ALT", "GUI", "CAPS",
 };
 
 static const lv_coord_t chip_x[ZMK_MOD_STATUS_CHIP_COUNT] = {
-    0, 45, 90, 143, 183,
+    27, 85, 151, 52, 114,
+};
+
+static const lv_coord_t chip_y[ZMK_MOD_STATUS_CHIP_COUNT] = {
+    0, 0, 0, ZMK_MOD_STATUS_SECOND_ROW_Y, ZMK_MOD_STATUS_SECOND_ROW_Y,
 };
 
 static const lv_coord_t chip_width[ZMK_MOD_STATUS_CHIP_COUNT] = {
-    41, 41, 49, 36, 39,
+    48, 56, 44, 50, 56,
 };
 
 static lv_style_t chip_base_style;
@@ -68,6 +75,8 @@ static void init_chip_styles(void) {
     lv_style_set_text_color(&chip_base_style, lv_color_hex(RMK_COLOR_DIM));
     lv_style_set_pad_all(&chip_base_style, 0);
     lv_style_set_pad_top(&chip_base_style, 3);
+    lv_style_set_pad_left(&chip_base_style, 6);
+    lv_style_set_pad_right(&chip_base_style, 6);
     lv_style_set_radius(&chip_base_style, 8);
     lv_style_set_bg_color(&chip_base_style, lv_color_hex(RMK_COLOR_ACCENT_DIM));
     lv_style_set_bg_opa(&chip_base_style, LV_OPA_20);
@@ -103,11 +112,11 @@ static void set_chip_state(struct zmk_widget_mod_status *widget, size_t index, b
 static void update_mod_status(struct zmk_widget_mod_status *widget) {
     struct mod_status_state state = mod_status_get_state();
     const bool active[ZMK_MOD_STATUS_CHIP_COUNT] = {
-        state.caps_lock,
         (state.modifiers & (MOD_LCTL | MOD_RCTL)) != 0,
         (state.modifiers & (MOD_LSFT | MOD_RSFT)) != 0,
         (state.modifiers & (MOD_LALT | MOD_RALT)) != 0,
         (state.modifiers & (MOD_LGUI | MOD_RGUI)) != 0,
+        state.caps_lock,
     };
 
     for (size_t i = 0; i < ZMK_MOD_STATUS_CHIP_COUNT; i++) {
@@ -130,15 +139,15 @@ int zmk_widget_mod_status_init(struct zmk_widget_mod_status *widget, lv_obj_t *p
 
     widget->obj = lv_obj_create(parent);
     lv_obj_remove_style_all(widget->obj);
-    lv_obj_set_size(widget->obj, 222, 22);
+    lv_obj_set_size(widget->obj, 222, ZMK_MOD_STATUS_WIDGET_HEIGHT);
     lv_obj_clear_flag(widget->obj, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
 
     for (size_t i = 0; i < ZMK_MOD_STATUS_CHIP_COUNT; i++) {
         lv_obj_t *chip = lv_label_create(widget->obj);
         widget->chips[i] = chip;
 
-        lv_obj_set_pos(chip, chip_x[i], 0);
-        lv_obj_set_size(chip, chip_width[i], 22);
+        lv_obj_set_pos(chip, chip_x[i], chip_y[i]);
+        lv_obj_set_size(chip, chip_width[i], ZMK_MOD_STATUS_CHIP_HEIGHT);
         lv_obj_clear_flag(chip, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
 
         lv_label_set_text(chip, chip_labels[i]);
