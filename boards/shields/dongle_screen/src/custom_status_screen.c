@@ -38,6 +38,8 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 LV_IMG_DECLARE(eh_robot);
 
+#define QUBE_LAYER_TOP_OFFSET 36
+
 lv_obj_t *screen_splash;
 lv_obj_t *screen_main;
 
@@ -79,12 +81,24 @@ lv_obj_t *zmk_display_status_screen()
 
 #if CONFIG_DONGLE_SCREEN_LAYER_ACTIVE
     zmk_widget_layer_status_init(&layer_status_widget, screen_main);
-    lv_obj_align(zmk_widget_layer_status_obj(&layer_status_widget), LV_ALIGN_TOP_MID, 0, 28);
+    lv_obj_align(zmk_widget_layer_status_obj(&layer_status_widget), LV_ALIGN_TOP_MID, 0,
+                 QUBE_LAYER_TOP_OFFSET);
 #endif
 
 #if CONFIG_DONGLE_SCREEN_MODIFIER_ACTIVE
     zmk_widget_mod_status_init(&mod_widget, screen_main);
-#if CONFIG_DONGLE_SCREEN_LAYER_ACTIVE
+#if CONFIG_DONGLE_SCREEN_LAYER_ACTIVE && CONFIG_DONGLE_SCREEN_BATTERY_ACTIVE
+    lv_obj_update_layout(screen_main);
+
+    lv_obj_t *layer_obj = zmk_widget_layer_status_obj(&layer_status_widget);
+    lv_obj_t *battery_obj = zmk_widget_dongle_battery_status_obj(&dongle_battery_status_widget);
+    lv_obj_t *modifier_obj = zmk_widget_mod_status_obj(&mod_widget);
+    const lv_coord_t layer_bottom = lv_obj_get_y(layer_obj) + lv_obj_get_height(layer_obj);
+    const lv_coord_t free_space = lv_obj_get_y(battery_obj) - layer_bottom;
+    const lv_coord_t modifier_y = layer_bottom + (free_space - lv_obj_get_height(modifier_obj)) / 2;
+
+    lv_obj_align(modifier_obj, LV_ALIGN_TOP_MID, 0, modifier_y);
+#elif CONFIG_DONGLE_SCREEN_LAYER_ACTIVE
     lv_obj_align_to(zmk_widget_mod_status_obj(&mod_widget),
                     zmk_widget_layer_status_obj(&layer_status_widget), LV_ALIGN_OUT_BOTTOM_MID, 0,
                     16);
