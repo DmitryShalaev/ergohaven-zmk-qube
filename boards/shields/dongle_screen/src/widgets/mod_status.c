@@ -20,21 +20,21 @@
 
 #define ZMK_MOD_STATUS_CAPS_LOCK_LED 0x02U
 #define ZMK_MOD_STATUS_REFRESH_MS 50
-#define ZMK_MOD_STATUS_CHIP_HEIGHT 22
-#define ZMK_MOD_STATUS_SECOND_ROW_Y 30
-#define ZMK_MOD_STATUS_WIDGET_HEIGHT 52
+#define ZMK_MOD_STATUS_CHIP_HEIGHT 24
+#define ZMK_MOD_STATUS_SECOND_ROW_Y 32
+#define ZMK_MOD_STATUS_WIDGET_HEIGHT 56
 
 #define RMK_COLOR_FOREGROUND 0xEFF7F7U
-#define RMK_COLOR_DIM 0x6570B1U
+#define RMK_COLOR_DIM 0x98A4E8U
 #define RMK_COLOR_ACCENT 0x189AFFU
 #define RMK_COLOR_ACCENT_DIM 0x084194U
 
 static const char *const chip_labels[ZMK_MOD_STATUS_CHIP_COUNT] = {
-    "CTRL", "SHIFT", "ALT", "GUI", "CAPS",
+    "ALT", "SHIFT", "CTRL", "GUI", "CAPS",
 };
 
 static const lv_coord_t chip_x[ZMK_MOD_STATUS_CHIP_COUNT] = {
-    27, 85, 151, 52, 114,
+    23, 77, 147, 52, 114,
 };
 
 static const lv_coord_t chip_y[ZMK_MOD_STATUS_CHIP_COUNT] = {
@@ -42,7 +42,7 @@ static const lv_coord_t chip_y[ZMK_MOD_STATUS_CHIP_COUNT] = {
 };
 
 static const lv_coord_t chip_width[ZMK_MOD_STATUS_CHIP_COUNT] = {
-    48, 56, 44, 50, 56,
+    44, 60, 52, 50, 56,
 };
 
 static lv_style_t chip_base_style;
@@ -69,7 +69,7 @@ static void init_chip_styles(void) {
     }
 
     lv_style_init(&chip_base_style);
-    lv_style_set_text_font(&chip_base_style, &lv_font_montserrat_14);
+    lv_style_set_text_font(&chip_base_style, &lv_font_montserrat_16);
     lv_style_set_text_align(&chip_base_style, LV_TEXT_ALIGN_CENTER);
     lv_style_set_text_letter_space(&chip_base_style, 0);
     lv_style_set_text_color(&chip_base_style, lv_color_hex(RMK_COLOR_DIM));
@@ -112,9 +112,9 @@ static void set_chip_state(struct zmk_widget_mod_status *widget, size_t index, b
 static void update_mod_status(struct zmk_widget_mod_status *widget) {
     struct mod_status_state state = mod_status_get_state();
     const bool active[ZMK_MOD_STATUS_CHIP_COUNT] = {
-        (state.modifiers & (MOD_LCTL | MOD_RCTL)) != 0,
-        (state.modifiers & (MOD_LSFT | MOD_RSFT)) != 0,
         (state.modifiers & (MOD_LALT | MOD_RALT)) != 0,
+        (state.modifiers & (MOD_LSFT | MOD_RSFT)) != 0,
+        (state.modifiers & (MOD_LCTL | MOD_RCTL)) != 0,
         (state.modifiers & (MOD_LGUI | MOD_RGUI)) != 0,
         state.caps_lock,
     };
